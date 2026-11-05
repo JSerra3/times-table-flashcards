@@ -10,7 +10,8 @@
 //  - Session n draws Box 1 always, Box 2 when n % 2 == 0, Box 3 when n % 4 == 0,
 //    Box 4 when n % 8 == 0, Box 5 when n % 16 == 0.
 //  - At most 5 never-seen cards join a session (up to 10 for big selections; see maxNewFor), picked at random from the whole selection
-//    (so choosing every table gives a mix, not all the 0s first). If too little is due,
+//    (so choosing every table gives a mix, not all the 0s first), with the 11s and 12s held
+//    back until the lower tables are built (see bigWeight). If too little is due,
 //    the session is topped up with the lowest-box cards from the selection, but only to half
 //    the chosen length: topping up all the way would show every card every session once the
 //    selection is small, and known facts would stop coming up less often.
@@ -79,6 +80,23 @@ export function newProfile(nickname, { id, now = Date.now() } = {}) {
   };
 }
 
+// The 11s and 12s come in sparingly while the lower tables are being built (Joey, Nov 5).
+// A never-seen card with an 11 or 12 is picked with weight 0.1 at first, rising to 1 as the
+// lower cards in the selection reach Box 3. If only big cards are chosen, they come in normally.
+export const BIG_START_WEIGHT = 0.1;
+export const isBig = k => parseKey(k).some(f => f >= 11);
+export function bigWeight(profile, deck) {
+  const lower = deck.filter(k => !isBig(k));
+  if (!lower.length) return 1;
+  const built = lower.filter(k => (profile.cards[k]?.box ?? 0) >= 3).length / lower.length;
+  return BIG_START_WEIGHT + (1 - BIG_START_WEIGHT) * built;
+}
+
+// Pick count cards at random, each with its own weight (weighted sampling without replacement).
+function weightedPick(keys, weight, count, rng) {
+  return keys.map(k => [Math.pow(rng(), 1 / weight(k)), k]).sort((x, y) => y[0] - x[0]).slice(0, count).map(x => x[1]);
+}
+
 // Plan the next session. Returns { n, queue, pos, firsts, retried }.
 export function planSession(profile, { tables, length = 20, maxNew, rng = Math.random } = {}) {
   const n = profile.sessionCount + 1;
@@ -89,7 +107,8 @@ export function planSession(profile, { tables, length = 20, maxNew, rng = Math.r
   const fresh = deck.filter(k => isNew(profile, k));
 
   const picked = byBox(profile, seen.filter(k => due.includes(boxOf(profile, k))), rng).slice(0, length);
-  const newOnes = shuffle(fresh, rng).slice(0, Math.min(maxNew, length - picked.length));
+  const big = bigWeight(profile, deck);
+  const newOnes = weightedPick(fresh, k => (isBig(k) ? big : 1), Math.max(0, Math.min(maxNew, length - picked.length)), rng);
   const queue = picked.concat(newOnes);
   const floor = Math.ceil(length / 2);
   if (queue.length < floor) {

@@ -25,7 +25,9 @@ modules, no build step.
 - Session *n* draws Box 1 always, Box 2 when *n* is a multiple of 2, Box 3 of 4, Box 4 of 8,
   Box 5 of 16.
 - Never-seen cards join a session at random from all the chosen tables: at most 5 for one or
-  two tables, growing to 10 when every table is picked (about one per 16 cards in the selection). If fewer cards than
+  two tables, growing to 10 when every table is picked (about one per 16 cards in the selection).
+  New cards with an 11 or 12 come in sparingly (a tenth as likely) until the lower cards in
+  the selection reach Box 3; if only 11s and 12s are chosen, they come in normally. If fewer cards than
   half the session length are due, it's topped up with the lowest-box cards.
 - Box 1–2 fronts show the fact and a dot array with no numbers; Box 3–5 show the fact only.
   The back is the same for every box. **Students never see a box number.**

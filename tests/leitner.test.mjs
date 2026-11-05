@@ -59,6 +59,30 @@ test("the new-card limit grows with the selection, from 5 to 10", () => {
   assert.equal(L.planSession(p, { tables: L.FACTORS, length: 30 }).queue.length, 10); // nothing seen yet, so nothing to top up with
 });
 
+test("the 11s and 12s come in sparingly until the lower tables are built", () => {
+  const p = L.newProfile("Sam", { id: "x", now: 0 });
+  const deck = L.deckFor(L.FACTORS);
+  let big = 0, total = 0;
+  for (let seed = 1; seed <= 200; seed++) {
+    const q = L.planSession(p, { tables: L.FACTORS, length: 20, rng: seeded(seed) }).queue;
+    big += q.filter(L.isBig).length; total += q.length;
+  }
+  // 48 of the 169 cards have an 11 or 12 (28%); at the start they should be rare.
+  assert.ok(big / total < 0.08, `${big} of ${total} new cards were 11s/12s`);
+
+  // Once every lower card is in Box 3 or higher, the 11s and 12s come in at full weight.
+  const built = L.newProfile("Sam", { id: "y", now: 0 });
+  for (const k of deck) if (!L.isBig(k)) built.cards[k] = { box: 3, lastSession: 1, seen: 3, right: 3, wrong: 0, flipRight: 0, flipWrong: 0, lastMs: 1 };
+  assert.equal(L.bigWeight(built, deck), 1);
+  const q = L.planSession(built, { tables: L.FACTORS, length: 20, rng: seeded(5) }).queue;
+  assert.ok(q.some(L.isBig));
+
+  // Picking only the 11s and 12s isn't held back.
+  assert.equal(L.bigWeight(p, ["11x11", "11x12", "12x11", "12x12"]), 1);
+  // The 11s alone: 11x0-12 and 0-12x11 all have an 11, so they all come in normally.
+  assert.equal(L.bigWeight(p, L.deckFor([11])), 1);
+});
+
 test("right moves up one box, wrong goes back to box 1, box 5 is the top", () => {
   let p = L.newProfile("Sam", { id: "x", now: 0 });
   p.cards["7x8"] = { box: 5, lastSession: 0, seen: 4, right: 4, wrong: 0, flipRight: 0, flipWrong: 0, lastMs: 1 };
