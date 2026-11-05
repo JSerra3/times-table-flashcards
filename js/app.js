@@ -6,6 +6,9 @@ const KEY = "elm-times-table-flashcards";
 const VERSION = 1;
 const $ = id => document.getElementById(id);
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+// Phones and tablets get an on-page number pad instead of the system keyboard: the iPhone
+// number pad has no Enter key, so typing there took type, ✓, then Check.
+const touch = matchMedia("(pointer: coarse)");
 
 // ---------------------------------------------------------------- saving
 let storageOk = true;
@@ -191,11 +194,12 @@ function renderFront() {
   const digits = String(a).length + String(b).length;
   counter();
 
-  const card = el("div", { class: `index ${visual ? "visual" : "plain"}${typing ? " typing" : ""}` }, el("div", { class: "tape" }));
+  const card = el("div", { class: `index ${visual ? "visual" : "plain"}${typing ? " typing" : ""}${typing && touch.matches ? " padded" : ""}` }, el("div", { class: "tape" }));
   stage().replaceChildren(card);
   const w = innerWidth(card);
   const phone = innerWidth(stage()) < 560;
-  const input = typing ? el("input", { class: "answer", id: "answer", type: "text", inputmode: "numeric", pattern: "[0-9]*", autocomplete: "off", placeholder: "?", "aria-label": `${times(a, b)} equals` }) : null;
+  const pad = typing && touch.matches;
+  const input = typing ? el("input", { class: "answer", id: "answer", type: "text", inputmode: pad ? "none" : "numeric", pattern: "[0-9]*", autocomplete: "off", placeholder: "?", readonly: pad, "aria-label": `${times(a, b)} equals` }) : null;
   input?.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); check(); } });
 
   let fact;
@@ -228,8 +232,22 @@ function renderFront() {
   const go = typing
     ? el("button", { class: "btn big", type: "button", text: "Check", onclick: check })
     : el("button", { class: "btn big", type: "button", id: "flip", text: "Flip it", onclick: flip });
-  $("actions").replaceChildren(go);
-  (input ?? go).focus({ preventScroll: true });
+  $("actions").replaceChildren(...(pad ? [keypad(), go] : [go]));
+  if (!pad) (input ?? go).focus({ preventScroll: true });
+}
+
+// The on-page number pad: two rows of die-cut keys, then the Check arrow.
+function press(key) {
+  const input = $("answer");
+  if (!input || busy || view?.kind !== "front") return;
+  if (key === "⌫") input.value = input.value.slice(0, -1);
+  else if (input.value.length < 3) input.value += key;
+}
+function keypad() {
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "⌫"];
+  return el("div", { class: "keypad", role: "group", "aria-label": "Number pad" },
+    keys.map(k => el("button", { type: "button", class: "key" + (k === "⌫" ? " del" : ""), text: k, "aria-label": k === "⌫" ? "delete" : k,
+      onpointerdown: e => e.preventDefault(), onclick: () => press(k) })));
 }
 
 function turn(draw) {
@@ -385,6 +403,12 @@ $("forget").onclick = () => {
 document.addEventListener("keydown", e => {
   if ($("play").hidden || e.metaKey || e.ctrlKey || e.altKey) return;
   const onControl = e.target.closest?.("button, input");
+  // A hardware keyboard still works with the on-page pad (an iPad with a keyboard).
+  if (view?.kind === "front" && document.querySelector(".keypad") && !e.target.closest?.("input:not([readonly])")) {
+    if (/^\d$/.test(e.key)) { e.preventDefault(); return press(e.key); }
+    if (e.key === "Backspace") { e.preventDefault(); return press("⌫"); }
+    if (e.key === "Enter" && !onControl) { e.preventDefault(); return check(); }
+  }
   if (view?.kind === "front" && e.key === " " && !onControl) { e.preventDefault(); flip(); }
   else if (view?.kind === "back" && view.wrote == null) {
     if (e.key === "ArrowLeft") { e.preventDefault(); grade(false); }
