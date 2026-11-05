@@ -45,6 +45,12 @@ modules, no build step.
 first answers only. `recent` keeps the last 200 attempts, retries included. Nothing leaves
 the browser.
 
+## Updating
+
+The site serves `/apps/*` with `Cache-Control: max-age=0, must-revalidate`, so browsers check
+for a new version on every visit. The `?v=3` on `css/app.css`, `js/app.js` and the
+`leitner.js` import was a one-time bump to push phones off a copy cached before that rule.
+
 ## Testing in the browser
 
 Serve the folder (`python3 -m http.server`; modules don't load from `file://`), then in the

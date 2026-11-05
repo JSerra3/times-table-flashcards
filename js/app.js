@@ -1,6 +1,6 @@
 // Times Table Flashcards: the page. The Leitner rules live in leitner.js; this file
 // draws the screens, saves to this browser and wires up finger, mouse and keyboard.
-import * as L from "./leitner.js";
+import * as L from "./leitner.js?v=3";
 
 const KEY = "elm-times-table-flashcards";
 const VERSION = 1;
