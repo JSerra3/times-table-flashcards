@@ -1,10 +1,10 @@
 /* Times Table Flashcards: the ELM Notebook house style (same art and fonts as
    everyonelovesmath.com; see the site's src/assets/css/site.css). */
 
-@font-face { font-family: "Luckiest Guy"; font-weight: 400; font-display: block; src: url("../assets/fonts/luckiest-guy-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Luckiest Guy"; font-weight: 400; font-display: swap; src: url("../assets/fonts/luckiest-guy-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "Courier Prime"; font-weight: 400; font-display: swap; src: url("../assets/fonts/courier-prime-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "Courier Prime"; font-weight: 700; font-display: swap; src: url("../assets/fonts/courier-prime-latin-700-normal.woff2") format("woff2"); }
-@font-face { font-family: "Pen Notes"; font-weight: 400; font-display: block; src: url("../assets/fonts/pen-notes.woff2") format("woff2"); }
+@font-face { font-family: "Pen Notes"; font-weight: 400; font-display: swap; src: url("../assets/fonts/pen-notes.woff2") format("woff2"); }
 
 :root {
   --ink: #2a2622; --ink-2: #574f46; --ink-3: #8a8173;

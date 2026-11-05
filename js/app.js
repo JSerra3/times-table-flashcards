@@ -412,7 +412,13 @@ addEventListener("resize", () => {
 // ---------------------------------------------------------------- go
 if (!db.current || !db.profiles[db.current]) db.current = Object.keys(db.profiles)[0] ?? null;
 $("storage-note").hidden = storageOk;
-document.fonts.ready.then(() => { renderStart(); show("start"); });
+// Wait for the fonts so the handwriting doesn't jump, but never more than a second.
+let started = false;
+const begin = () => { if (started) return; started = true; renderStart(); show("start"); };
+document.fonts.ready.then(begin);
+setTimeout(begin, 1000);
+// If the fonts arrive after a card is drawn, draw it again so it fits.
+document.fonts.addEventListener("loadingdone", () => dispatchEvent(new Event("resize")));
 
 // For testing in the browser console: __ttf.setBox("7x8", 4)
 window.__ttf = { L, get db() { return db; }, setBox(k, box) { const p = me(); p.cards[k] = { ...(p.cards[k] ?? { lastSession: 0, seen: 1, right: 0, wrong: 0, flipRight: 0, flipWrong: 0, lastMs: null }), box }; save(); },
