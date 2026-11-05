@@ -9,7 +9,8 @@
 //    that retry is recorded but never moves the box.
 //  - Session n draws Box 1 always, Box 2 when n % 2 == 0, Box 3 when n % 4 == 0,
 //    Box 4 when n % 8 == 0, Box 5 when n % 16 == 0.
-//  - At most 5 never-seen cards join a session, lower tables first. If too little is due,
+//  - At most 5 never-seen cards join a session, picked at random from the whole selection
+//    (so choosing every table gives a mix, not all the 0s first). If too little is due,
 //    the session is topped up with the lowest-box cards from the selection, but only to half
 //    the chosen length: topping up all the way would show every card every session once the
 //    selection is small, and known facts would stop coming up less often.
@@ -83,7 +84,7 @@ export function planSession(profile, { tables, length = 20, maxNew = MAX_NEW, rn
   const fresh = deck.filter(k => isNew(profile, k));
 
   const picked = byBox(profile, seen.filter(k => due.includes(boxOf(profile, k))), rng).slice(0, length);
-  const newOnes = fresh.slice(0, Math.min(maxNew, length - picked.length));
+  const newOnes = shuffle(fresh, rng).slice(0, Math.min(maxNew, length - picked.length));
   const queue = picked.concat(newOnes);
   const floor = Math.ceil(length / 2);
   if (queue.length < floor) {

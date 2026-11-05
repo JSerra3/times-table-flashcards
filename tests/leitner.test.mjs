@@ -37,6 +37,18 @@ test("first session brings in at most 5 new cards", () => {
   assert.equal(s.n, 1);
 });
 
+test("new cards are a mix of the chosen tables, not the lowest table first", () => {
+  const p = L.newProfile("Sam", { id: "x", now: 0 });
+  const zerosOnly = k => L.parseKey(k).includes(0);
+  let mixed = 0;
+  for (let seed = 1; seed <= 20; seed++) {
+    const s = L.planSession(p, { tables: L.FACTORS, length: 20, rng: seeded(seed) });
+    assert.equal(s.queue.length, 5);
+    if (!s.queue.every(zerosOnly)) mixed++;
+  }
+  assert.ok(mixed >= 18, `${mixed} of 20 first sessions were mixed`);
+});
+
 test("right moves up one box, wrong goes back to box 1, box 5 is the top", () => {
   let p = L.newProfile("Sam", { id: "x", now: 0 });
   p.cards["7x8"] = { box: 5, lastSession: 0, seen: 4, right: 4, wrong: 0, flipRight: 0, flipWrong: 0, lastMs: 1 };
