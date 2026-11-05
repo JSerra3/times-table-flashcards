@@ -9,14 +9,18 @@
 //    that retry is recorded but never moves the box.
 //  - Session n draws Box 1 always, Box 2 when n % 2 == 0, Box 3 when n % 4 == 0,
 //    Box 4 when n % 8 == 0, Box 5 when n % 16 == 0.
-//  - At most 5 never-seen cards join a session, picked at random from the whole selection
+//  - At most 5 never-seen cards join a session (up to 10 for big selections; see maxNewFor), picked at random from the whole selection
 //    (so choosing every table gives a mix, not all the 0s first). If too little is due,
 //    the session is topped up with the lowest-box cards from the selection, but only to half
 //    the chosen length: topping up all the way would show every card every session once the
 //    selection is small, and known facts would stop coming up less often.
 
 export const MAX_BOX = 5;
-export const MAX_NEW = 5;
+export const MAX_NEW = 5;       // new cards per session for a small selection (one or two tables)
+export const MAX_NEW_TOP = 10;  // ...growing to this for a big one (every table)
+// How many never-seen cards may join a session: about one per 16 cards in the selection,
+// between 5 and 10. One table (25 cards) -> 5, six tables -> 8, all 169 -> 10.
+export const maxNewFor = deckSize => Math.min(MAX_NEW_TOP, Math.max(MAX_NEW, Math.round(deckSize / 16)));
 export const RECENT_LIMIT = 200;
 export const FACTORS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
@@ -76,9 +80,10 @@ export function newProfile(nickname, { id, now = Date.now() } = {}) {
 }
 
 // Plan the next session. Returns { n, queue, pos, firsts, retried }.
-export function planSession(profile, { tables, length = 20, maxNew = MAX_NEW, rng = Math.random } = {}) {
+export function planSession(profile, { tables, length = 20, maxNew, rng = Math.random } = {}) {
   const n = profile.sessionCount + 1;
   const deck = deckFor(tables ?? profile.settings.tables);
+  maxNew ??= maxNewFor(deck.length);
   const due = dueBoxes(n);
   const seen = deck.filter(k => !isNew(profile, k));
   const fresh = deck.filter(k => isNew(profile, k));

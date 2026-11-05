@@ -43,10 +43,20 @@ test("new cards are a mix of the chosen tables, not the lowest table first", () 
   let mixed = 0;
   for (let seed = 1; seed <= 20; seed++) {
     const s = L.planSession(p, { tables: L.FACTORS, length: 20, rng: seeded(seed) });
-    assert.equal(s.queue.length, 5);
+    assert.equal(s.queue.length, 10);
     if (!s.queue.every(zerosOnly)) mixed++;
   }
   assert.ok(mixed >= 18, `${mixed} of 20 first sessions were mixed`);
+});
+
+test("the new-card limit grows with the selection, from 5 to 10", () => {
+  assert.equal(L.maxNewFor(L.deckFor([7]).length), 5);
+  assert.equal(L.maxNewFor(L.deckFor([7, 8]).length), 5);
+  assert.equal(L.maxNewFor(L.deckFor([2, 3, 4, 5, 6, 7]).length), 8);
+  assert.equal(L.maxNewFor(L.deckFor(L.FACTORS).length), 10);
+  const p = L.newProfile("Sam", { id: "x", now: 0 });
+  assert.equal(L.planSession(p, { tables: L.FACTORS, length: 10 }).queue.length, 10);
+  assert.equal(L.planSession(p, { tables: L.FACTORS, length: 30 }).queue.length, 10); // nothing seen yet, so nothing to top up with
 });
 
 test("right moves up one box, wrong goes back to box 1, box 5 is the top", () => {
@@ -130,7 +140,7 @@ function simulate({ tables, sessions, length, skill, seed }) {
     assert.ok(s.queue.length <= length);
     assert.equal(new Set(s.queue).size, s.queue.length, "no card twice in a planned session");
     const newCount = s.queue.filter(k => L.isNew(p, k)).length;
-    assert.ok(newCount <= L.MAX_NEW);
+    assert.ok(newCount <= L.maxNewFor(L.deckFor(tables).length));
     let guard = 0;
     while (!L.isDone(s)) {
       const k = L.currentCard(s);
