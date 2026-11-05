@@ -1,6 +1,6 @@
 // Times Table Flashcards: the page. The Leitner rules live in leitner.js; this file
 // draws the screens, saves to this browser and wires up finger, mouse and keyboard.
-import * as L from "./leitner.js?v=5";
+import * as L from "./leitner.js?v=6";
 
 const KEY = "elm-times-table-flashcards";
 const VERSION = 1;
@@ -194,11 +194,16 @@ function renderFront() {
   const digits = String(a).length + String(b).length;
   counter();
 
-  const card = el("div", { class: `index ${visual ? "visual" : "plain"}${typing ? " typing" : ""}${typing && touch.matches ? " padded" : ""}` }, el("div", { class: "tape" }));
+  const pad = typing && touch.matches;
+  const go = typing
+    ? el("button", { class: "btn big", type: "button", text: "Check", onclick: check })
+    : el("button", { class: "btn big", type: "button", id: "flip", text: "Flip it", onclick: flip });
+  $("actions").replaceChildren(...(pad ? [keypad(), go] : [go])); // first, so the room left for the card is known
+
+  const card = el("div", { class: `index ${visual ? "visual" : "plain"}${typing ? " typing" : ""}${pad ? " padded" : ""}` }, el("div", { class: "tape" }));
   stage().replaceChildren(card);
   const w = innerWidth(card);
   const phone = innerWidth(stage()) < 560;
-  const pad = typing && touch.matches;
   const input = typing ? el("input", { class: "answer", id: "answer", type: "text", inputmode: pad ? "none" : "numeric", pattern: "[0-9]*", autocomplete: "off", placeholder: "?", readonly: pad, "aria-label": `${times(a, b)} equals` }) : null;
   input?.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); check(); } });
 
@@ -214,9 +219,10 @@ function renderFront() {
       card.append(fact);
       fit(fact, w, [88, 80, 72][digits - 2]);
     }
-    const maxH = Math.max(120, Math.min(typing ? 230 : 250, stage().clientHeight - 230));
     if (a > 0 && b > 0) {
-      const arr = arrayEl(a, b, { labels: false, maxW: Math.min(w - 10, 480), maxH, maxCell: 44 });
+      // The array is the star: it gets all the height the card has left on screen.
+      const maxH = Math.max(120, roomLeft(card));
+      const arr = arrayEl(a, b, { labels: false, maxW: w - 4, maxH, maxCell: 64 });
       arr.setAttribute("role", "img"); arr.setAttribute("aria-label", `${rowsOf(a, b)} dots`);
       card.append(arr);
     } else card.append(el("div", { class: "empty", role: "img", "aria-label": `${rowsOf(a, b)} dots` }));
@@ -228,11 +234,6 @@ function renderFront() {
     else card.append(el("p", { class: "say", text: "say it in your head, then flip!" }));
   }
   fact.setAttribute("aria-label", times(a, b).replace("×", "times"));
-
-  const go = typing
-    ? el("button", { class: "btn big", type: "button", text: "Check", onclick: check })
-    : el("button", { class: "btn big", type: "button", id: "flip", text: "Flip it", onclick: flip });
-  $("actions").replaceChildren(...(pad ? [keypad(), go] : [go]));
   if (!pad) (input ?? go).focus({ preventScroll: true });
 }
 
@@ -257,7 +258,17 @@ function turn(draw) {
   setTimeout(() => { draw(); setTimeout(() => stage().classList.remove("turning"), 20); }, 160);
 }
 
-function renderBack() {
+// How much taller a card can grow before it overflows the stage (measured with nothing in it
+// but its fact, so the array can take the rest).
+function roomLeft(card) {
+  card.style.minHeight = "0";
+  const room = stage().clientHeight - card.offsetHeight - 16;
+  card.style.minHeight = "";
+  return room;
+}
+
+function renderBack(buttons) {
+  if (buttons) $("actions").replaceChildren(...buttons); // first, so the room left for the sheet is known
   const k = view.k ?? L.currentCard(session);
   const [a, b] = L.parseKey(k);
   const sheet = el("div", { class: "leaf f2 back", tabindex: "-1" }, el("div", { class: "tape t2" }));
@@ -271,8 +282,8 @@ function renderBack() {
   stage().replaceChildren(sheet);
   fit(head.firstChild, innerWidth(sheet), innerWidth(stage()) < 560 ? 42 : 58);
   if (a > 0 && b > 0) {
-    const maxH = Math.max(140, Math.min(a > 8 ? 340 : 262, stage().clientHeight - 170));
-    const arr = arrayEl(a, b, { labels: true, maxW: Math.min(innerWidth(sheet), 600), maxH, maxCell: 54 });
+    const maxH = Math.max(140, roomLeft(sheet));
+    const arr = arrayEl(a, b, { labels: true, maxW: innerWidth(sheet), maxH, maxCell: 64 });
     arr.setAttribute("role", "img");
     arr.setAttribute("aria-label", `${rowsOf(a, b)} dots, ${a * b} in all`);
     body.append(arr);
@@ -287,10 +298,9 @@ function flip() {
   if (busy || view?.kind !== "front") return;
   view = { kind: "back", k: L.currentCard(session), ms: Math.round(performance.now() - shownAt) };
   turn(() => {
-    renderBack();
-    $("actions").replaceChildren(
+    renderBack([
       el("button", { class: "btn btn--paper big", type: "button", text: "Not yet", onclick: () => grade(false) }),
-      el("button", { class: "btn big", type: "button", text: "Got it", onclick: () => grade(true) }));
+      el("button", { class: "btn big", type: "button", text: "Got it", onclick: () => grade(true) })]);
   });
 }
 
@@ -321,9 +331,8 @@ function check() {
   // Right or wrong, a typed answer turns the card over to the back's labeled array.
   view = { kind: "back", k, typed: true, correct, wrote: correct ? null : text };
   turn(() => {
-    renderBack();
     const next = el("button", { class: "btn big", type: "button", text: "Next", onclick: () => { if (view.kind === "back") nextCard(); } });
-    $("actions").replaceChildren(next);
+    renderBack([next]);
     busy = false;
     next.focus({ preventScroll: true });
   });

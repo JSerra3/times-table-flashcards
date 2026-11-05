@@ -253,14 +253,20 @@ button { font: inherit; color: inherit; }
   .hand { font-size: 22px; }
   .leaf { padding: 26px 22px 24px 24px; }
   .bar { gap: 8px; }
-  .meta { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 0 12px; margin-left: 0; width: 100%; justify-content: space-between; }
+  .meta { flex-direction: row; align-items: center; flex-wrap: nowrap; gap: 0 8px; margin-left: 0; width: 100%; justify-content: space-between; }
+  .meta .pills { gap: 2px; flex-wrap: nowrap; }
+  .meta .pill { font-size: 12px; letter-spacing: .06em; padding: 7px 5px 6px; white-space: nowrap; }
+  .count { font-size: 12px; letter-spacing: .06em; white-space: nowrap; }
+  .stop { font-size: 11px; letter-spacing: .02em; padding-top: 4px; white-space: nowrap; }
+  #play { gap: 12px; padding-top: 14px; padding-bottom: 14px; }
+  .back { padding: 24px 14px 18px 16px; gap: 8px; }
   .index { padding: 30px 16px 24px 38px; gap: 12px; }
   .index::before { left: 22px; }
   .index.visual { min-height: 380px; }
   .index.plain { min-height: 300px; }
   .answer { width: 110px; height: 60px; font-size: 36px; }
   .say, .under-ans label { font-size: 24px; }
-  .back { min-height: 380px; padding: 26px 18px 22px 20px; }
+  .back { min-height: 380px; }
   .back .fact { font-size: 42px; }
   .rows-of { font-size: 24px; }
   .summary { grid-template-columns: 1fr; }
