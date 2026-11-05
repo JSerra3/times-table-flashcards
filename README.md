@@ -30,7 +30,8 @@ modules, no build step.
   the selection reach Box 3; if only 11s and 12s are chosen, they come in normally. If fewer cards than
   half the session length are due, it's topped up with the lowest-box cards.
 - Box 1–2 fronts show the fact and a dot array with no numbers; Box 3–5 show the fact only.
-  The back is the same for every box. **Students never see a box number.**
+  The back is the same for every box: running totals down the right and along the bottom, the
+  last of each being the product, all in the same plain style. **Students never see a box number.**
 - Only right or wrong moves a card. Time per answer is saved for later.
 
 ## Saved data
@@ -48,7 +49,7 @@ the browser.
 ## Updating
 
 The site serves `/apps/*` with `Cache-Control: max-age=0, must-revalidate`, so browsers check
-for a new version on every visit. Bump the `?v=` number (now 4) on `css/app.css`, `js/app.js` and the
+for a new version on every visit. Bump the `?v=` number (now 5) on `css/app.css`, `js/app.js` and the
 `leitner.js` import with each change: Cloudflare's Browser Cache TTL still holds those files for 4 hours.
 
 ## Testing in the browser

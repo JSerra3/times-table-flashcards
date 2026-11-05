@@ -1,6 +1,6 @@
 // Times Table Flashcards: the page. The Leitner rules live in leitner.js; this file
 // draws the screens, saves to this browser and wires up finger, mouse and keyboard.
-import * as L from "./leitner.js?v=4";
+import * as L from "./leitner.js?v=5";
 
 const KEY = "elm-times-table-flashcards";
 const VERSION = 1;
@@ -87,7 +87,7 @@ function fit(node, maxW, fs) {
 }
 
 // The array: one dot per unit, a rows of b. With labels (the back) it adds the running
-// totals down the right and along the bottom, and the total in the corner, as in Joey's PDFs.
+// totals down the right and along the bottom; the last of each is the product, in the same plain style (Joey, Nov 5).
 function arrayEl(a, b, { labels, maxW, maxH, maxCell }) {
   const labW = labels ? 44 : 0, labH = labels ? 28 : 0;
   const cell = Math.max(8, Math.floor(Math.min((maxW - labW) / b, (maxH - labH) / a, maxCell)));
@@ -101,11 +101,11 @@ function arrayEl(a, b, { labels, maxW, maxH, maxCell }) {
   g.style.setProperty("--cell", cell + "px"); g.style.setProperty("--dot", dot + "px"); g.style.setProperty("--lab", lab + "px");
   for (let r = 1; r <= a; r++) {
     for (let c = 1; c <= b; c++) g.append(el("i"));
-    if (labels) g.append(el("b", { class: "r", text: r < a ? r * b : "" }));
+    if (labels) g.append(el("b", { class: "r", text: r * b }));
   }
   if (labels) {
-    for (let c = 1; c <= b; c++) g.append(el("b", { class: "c", text: c < b ? c * a : "" }));
-    g.append(el("b", { class: "t", text: a * b }));
+    for (let c = 1; c <= b; c++) g.append(el("b", { class: "c", text: c * a }));
+    g.append(el("b"));
   }
   return g;
 }
