@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Times Table Flashcards · Everyone Loves Math</title>
+<meta name="description" content="Times table flashcards from 0 × 0 to 12 × 12. Facts you miss come back more often; facts you know come back less. Free, no login, saved on this device.">
+<link rel="icon" href="assets/favicon.png">
+<link rel="preload" href="assets/fonts/luckiest-guy-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/pen-notes.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<main id="app">
+
+  <!-- ===== Start ===== -->
+  <section id="start" class="screen" hidden>
+    <a class="corner" href="https://www.everyonelovesmath.com/apps/"><img src="assets/logo-sticker.webp" alt="Everyone Loves Math: more apps" width="558" height="220"></a>
+    <div class="strip s1 head"><h1>Times Table Flashcards</h1></div>
+
+    <div class="leaf f1 who">
+      <h2 class="lbl">Who's practicing?</h2>
+      <div class="profiles" id="profiles" role="group" aria-label="Nicknames on this device"></div>
+      <form class="add" id="add-form" autocomplete="off">
+        <label for="nick" class="hand">new nickname</label>
+        <input id="nick" maxlength="20" placeholder="nickname">
+        <button class="btn btn--sm" type="submit">Add</button>
+      </form>
+    </div>
+
+    <div class="leaf f2 tables">
+      <div class="row-head"><h2 class="lbl" id="tables-lbl">Which tables?</h2>
+        <span class="quick"><button type="button" class="link" id="all">all</button> · <button type="button" class="link" id="none">clear</button></span></div>
+      <div class="dots" id="table-picks" role="group" aria-labelledby="tables-lbl"></div>
+      <p class="hint" id="table-hint"></p>
+    </div>
+
+    <div class="leaf f1 how">
+      <div>
+        <h2 class="lbl" id="mode-lbl">How do you want to answer?</h2>
+        <div class="pills" role="group" aria-labelledby="mode-lbl" data-setting="mode">
+          <button class="pill" type="button" data-value="flip">Flip it</button>
+          <button class="pill" type="button" data-value="type">Type it</button>
+        </div>
+      </div>
+      <div>
+        <h2 class="lbl" id="len-lbl">How many cards?</h2>
+        <div class="pills" role="group" aria-labelledby="len-lbl" data-setting="length">
+          <button class="pill" type="button" data-value="10">10</button>
+          <button class="pill" type="button" data-value="20">20</button>
+          <button class="pill" type="button" data-value="30">30</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row center">
+      <button class="btn btn--paper" type="button" id="to-progress">My progress</button>
+      <button class="btn big" type="button" id="go">Start</button>
+    </div>
+  </section>
+
+  <!-- ===== A card ===== -->
+  <section id="play" class="screen" hidden>
+    <div class="bar">
+      <div class="strip s1"><h1>Times Tables</h1><span class="hand" id="which"></span></div>
+      <div class="meta">
+        <div class="pills" role="group" aria-label="How to answer" data-setting="mode">
+          <button class="pill" type="button" data-value="flip">Flip it</button>
+          <button class="pill" type="button" data-value="type">Type it</button>
+        </div>
+        <p class="count" id="count" aria-live="polite"></p>
+        <button class="link stop" type="button" id="stop">stop for now</button>
+      </div>
+    </div>
+    <div class="stage" id="stage"></div>
+    <div class="actions" id="actions"></div>
+  </section>
+
+  <!-- ===== End of a session ===== -->
+  <section id="end" class="screen" hidden>
+    <div class="strip s2 head"><h1>Nice work!</h1><span class="hand" id="end-who"></span></div>
+    <div class="leaf f2 summary">
+      <div class="col"><h2 class="lbl">Facts you nailed</h2><ul class="facts" id="nailed"></ul></div>
+      <div class="col"><h2 class="lbl">Facts to keep practicing</h2><ul class="facts" id="practice"></ul></div>
+    </div>
+    <div class="btn-row center">
+      <button class="btn btn--paper" type="button" id="end-progress">My progress</button>
+      <button class="btn btn--paper" type="button" id="end-home">Change tables</button>
+      <button class="btn big" type="button" id="again">Go again</button>
+    </div>
+  </section>
+
+  <!-- ===== Progress ===== -->
+  <section id="progress" class="screen" hidden>
+    <div class="strip s3 head"><h1>My progress</h1><span class="hand" id="prog-who"></span></div>
+    <div class="prog">
+      <div class="leaf f1 gridwrap">
+        <table class="tt" id="tt"><caption class="sr">Times table from 0 to 12. Each square is shaded by how well you know that fact. Tap a square to see how it's gone.</caption></table>
+        <div class="legend" aria-hidden="true"><span>new</span><i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><i class="l5"></i><span>mastered</span></div>
+      </div>
+      <div class="sticky detail" id="detail" aria-live="polite"><p class="said-text">Tap a square to see how that fact is going.</p></div>
+    </div>
+    <div class="btn-row center">
+      <button class="link forget" type="button" id="forget">forget this nickname</button>
+      <button class="btn" type="button" id="prog-back">Back</button>
+    </div>
+  </section>
+
+</main>
+<p class="note" id="storage-note" hidden>This browser isn't saving progress, so it will be lost when you close the page.</p>
+</body>
+</html>
