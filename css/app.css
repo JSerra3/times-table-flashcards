@@ -172,7 +172,7 @@ button { font: inherit; color: inherit; }
 .under-ans label { font: 400 30px/1 var(--hand); color: var(--ink-2); }
 .answer { width: 150px; height: 70px; padding: 8px 10px 0; font: 400 44px/1 var(--display); text-align: center; transform: rotate(1deg); }
 .answer::placeholder { color: var(--ink-3); }
-.yes { position: absolute; right: 26px; bottom: 22px; padding: 10px 16px 6px; font: 400 30px/1 var(--display); text-transform: uppercase;
+.yes { position: absolute; right: 26px; bottom: 22px; z-index: 3; padding: 10px 16px 6px; font: 400 30px/1 var(--display); text-transform: uppercase;
   background: var(--mint); border: 3px solid var(--ink); border-radius: 10px 14px 8px 12px; box-shadow: 3px 4px 0 var(--ink); transform: rotate(-6deg); }
 
 /* dot arrays, drawn in code */
@@ -188,9 +188,9 @@ button { font: inherit; color: inherit; }
 .empty { width: min(320px, 80%); height: 150px; border: 2.5px dashed var(--ink-3); border-radius: 6px 12px 8px 10px; }
 
 /* the on-page number pad (touch screens) */
-.actions:has(.keypad) { flex-direction: column; flex-wrap: nowrap; gap: 14px; }
-.keypad { display: grid; grid-template-columns: repeat(6, 52px); gap: 10px 10px; justify-content: center; }
-.key { height: 52px; padding-top: 6px; cursor: pointer; display: grid; place-items: center; touch-action: manipulation;
+.actions:has(.keypad) { flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 26px; }
+.keypad { display: grid; grid-template-columns: repeat(3, 56px); gap: 10px 12px; justify-content: center; }
+.key { height: 50px; padding-top: 6px; cursor: pointer; display: grid; place-items: center; touch-action: manipulation;
   font: 400 28px/1 var(--display); color: var(--ink); background: #fff; border: 3px solid var(--ink);
   border-radius: 52% 48% 55% 45% / 50% 55% 45% 50%; box-shadow: 2px 3px 0 var(--ink); transform: rotate(-3deg); user-select: none; -webkit-user-select: none; }
 .key:nth-child(3n+1) { transform: rotate(2deg); border-radius: 48% 54% 46% 52% / 54% 46% 52% 48%; }
@@ -211,6 +211,7 @@ button { font: inherit; color: inherit; }
 .zero { text-align: center; }
 .zero p { margin: 0 0 10px; }
 .zero .big-hand { font: 400 40px/1.1 var(--hand); }
+.back .yes { position: static; align-self: flex-start; margin: 0 0 0 4px; padding: 8px 14px 4px; font-size: 24px; transform: rotate(-4deg); }
 .wrote { margin: 0; font: 400 26px/1.1 var(--hand); color: var(--ray-red); }
 
 /* ================= End ================= */
@@ -278,8 +279,9 @@ button { font: inherit; color: inherit; }
   .add input { width: 170px; }
   .index.padded.visual { min-height: 0; }
   .index.padded.plain { min-height: 0; }
-  .keypad { grid-template-columns: repeat(6, minmax(0, 48px)); gap: 8px; }
-  .key { height: 48px; font-size: 26px; }
+  .actions:has(.keypad) { gap: 18px; }
+  .keypad { grid-template-columns: repeat(3, 54px); gap: 8px 10px; }
+  .key { height: 46px; font-size: 26px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

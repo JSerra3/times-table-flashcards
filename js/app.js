@@ -1,6 +1,6 @@
 // Times Table Flashcards: the page. The Leitner rules live in leitner.js; this file
 // draws the screens, saves to this browser and wires up finger, mouse and keyboard.
-import * as L from "./leitner.js?v=3";
+import * as L from "./leitner.js?v=4";
 
 const KEY = "elm-times-table-flashcards";
 const VERSION = 1;
@@ -236,7 +236,7 @@ function renderFront() {
   if (!pad) (input ?? go).focus({ preventScroll: true });
 }
 
-// The on-page number pad: two rows of die-cut keys, then the Check arrow.
+// The on-page number pad: die-cut keys in a phone layout, with the Check arrow beside it.
 function press(key) {
   const input = $("answer");
   if (!input || busy || view?.kind !== "front") return;
@@ -244,9 +244,10 @@ function press(key) {
   else if (input.value.length < 3) input.value += key;
 }
 function keypad() {
-  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "⌫"];
+  // laid out like a phone's keypad: 1 2 3 / 4 5 6 / 7 8 9 / _ 0 ⌫
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"];
   return el("div", { class: "keypad", role: "group", "aria-label": "Number pad" },
-    keys.map(k => el("button", { type: "button", class: "key" + (k === "⌫" ? " del" : ""), text: k, "aria-label": k === "⌫" ? "delete" : k,
+    keys.map(k => k === "" ? el("span", { "aria-hidden": "true" }) : el("button", { type: "button", class: "key" + (k === "⌫" ? " del" : ""), text: k, "aria-label": k === "⌫" ? "delete" : k,
       onpointerdown: e => e.preventDefault(), onclick: () => press(k) })));
 }
 
@@ -264,6 +265,7 @@ function renderBack() {
     el("p", { class: "rows-of" }, el("span", { class: "hl", text: rowsOf(a, b) })));
   sheet.append(head);
   if (view.wrote != null) sheet.append(el("p", { class: "wrote", text: `you wrote ${view.wrote}` }));
+  if (view.correct) sheet.append(el("div", { class: "yes", role: "status", text: "Yes!" }));
   const body = el("div", { class: "back-body" });
   sheet.append(body);
   stage().replaceChildren(sheet);
@@ -299,7 +301,7 @@ function record(correct, mode, ms) {
 }
 
 function grade(correct) {
-  if (busy || view?.kind !== "back" || view.wrote != null) return;
+  if (busy || view?.kind !== "back" || view.typed) return;
   busy = true;
   record(correct, "flip", view.ms);
   nextCard();
@@ -316,20 +318,15 @@ function check() {
   const correct = Number(text) === a * b;
   busy = true;
   record(correct, "type", ms);
-  if (correct) {
-    input.readOnly = true;
-    document.querySelector(".index").append(el("div", { class: "yes", role: "status", text: "Yes!" }));
-    setTimeout(nextCard, reduceMotion.matches ? 900 : 700);
-  } else {
-    view = { kind: "back", k, wrote: text };
-    turn(() => {
-      renderBack();
-      const next = el("button", { class: "btn big", type: "button", text: "Next", onclick: () => { if (view.kind === "back") nextCard(); } });
-      $("actions").replaceChildren(next);
-      busy = false;
-      next.focus({ preventScroll: true });
-    });
-  }
+  // Right or wrong, a typed answer turns the card over to the back's labeled array.
+  view = { kind: "back", k, typed: true, correct, wrote: correct ? null : text };
+  turn(() => {
+    renderBack();
+    const next = el("button", { class: "btn big", type: "button", text: "Next", onclick: () => { if (view.kind === "back") nextCard(); } });
+    $("actions").replaceChildren(next);
+    busy = false;
+    next.focus({ preventScroll: true });
+  });
 }
 
 $("stop").onclick = () => (session && Object.keys(session.firsts).length ? endSession() : home());
@@ -410,11 +407,11 @@ document.addEventListener("keydown", e => {
     if (e.key === "Enter" && !onControl) { e.preventDefault(); return check(); }
   }
   if (view?.kind === "front" && e.key === " " && !onControl) { e.preventDefault(); flip(); }
-  else if (view?.kind === "back" && view.wrote == null) {
+  else if (view?.kind === "back" && !view.typed) {
     if (e.key === "ArrowLeft") { e.preventDefault(); grade(false); }
     else if (e.key === "ArrowRight") { e.preventDefault(); grade(true); }
     else if (e.key === " " && !onControl) e.preventDefault();
-  } else if (view?.kind === "back" && view.wrote != null && !onControl && (e.key === "Enter" || e.key === " " || e.key === "ArrowRight")) {
+  } else if (view?.kind === "back" && view.typed && !onControl && (e.key === "Enter" || e.key === " " || e.key === "ArrowRight")) {
     e.preventDefault(); nextCard();
   }
 });

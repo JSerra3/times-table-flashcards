@@ -48,8 +48,8 @@ the browser.
 ## Updating
 
 The site serves `/apps/*` with `Cache-Control: max-age=0, must-revalidate`, so browsers check
-for a new version on every visit. The `?v=3` on `css/app.css`, `js/app.js` and the
-`leitner.js` import was a one-time bump to push phones off a copy cached before that rule.
+for a new version on every visit. Bump the `?v=` number (now 4) on `css/app.css`, `js/app.js` and the
+`leitner.js` import with each change: Cloudflare's Browser Cache TTL still holds those files for 4 hours.
 
 ## Testing in the browser
 
