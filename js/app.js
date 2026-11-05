@@ -1,6 +1,6 @@
 // Times Table Flashcards: the page. The Leitner rules live in leitner.js; this file
 // draws the screens, saves to this browser and wires up finger, mouse and keyboard.
-import * as L from "./leitner.js?v=6";
+import * as L from "./leitner.js?v=7";
 
 const KEY = "elm-times-table-flashcards";
 const VERSION = 1;
@@ -261,8 +261,9 @@ function turn(draw) {
 // How much taller a card can grow before it overflows the stage (measured with nothing in it
 // but its fact, so the array can take the rest).
 function roomLeft(card) {
+  const floor = parseFloat(getComputedStyle(card).minHeight) || 0; // the card is at least this tall anyway
   card.style.minHeight = "0";
-  const room = stage().clientHeight - card.offsetHeight - 16;
+  const room = Math.max(stage().clientHeight - 16, floor) - card.offsetHeight;
   card.style.minHeight = "";
   return room;
 }
